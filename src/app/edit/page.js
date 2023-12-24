@@ -1,6 +1,6 @@
 'use client'
 import ProfileForm from '../../components/ProfileForm';
-import { Avatar, Box, Button, Card, CardBody, CardHeader, Container, Flex, FormControl,  Image, Input, Link, Text, Textarea } from '@chakra-ui/react';
+import { Box, Button, Card, CardBody, CardHeader, Container, Flex, Link, Text } from '@chakra-ui/react';
 import PortofolioForm from '../../components/PortofolioForm';
 import Profile from '@/components/Profile';
 import useSWR from 'swr';
@@ -8,6 +8,9 @@ import ListPortofolio from '@/components/ListPortofolio';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Error from 'next/error';
+import AvatarImage from '@/components/AvatarImage';
+import BackgroundImage from '@/components/BackgroundImage';
+import FileUpload from '@/components/FileUpload';
 const fetchData = async(url) => {
   const response = await fetch(url);
   const data = await response.json();
@@ -72,17 +75,36 @@ const addPortofolio = async(url, data) => {
     throw new Error(error.message);
   }
 }
+
+const updateMedia = async(url, data) => {
+  try {
+    await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data),
+    })
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
 const portofolioUrl = 'https://6586ceb3468ef171392ec700.mockapi.io/api/v1/portofolios';
 const profileUrl = 'https://6586ceb3468ef171392ec700.mockapi.io/api/v1/profile';
+const mediaUrl = '/api/media';
 
 export default function Page() {
   
   const router = useRouter();
   const { data: portofolios, error: portofolioError, isLoading: portofolioLoading, mutate: portofolioMutate } = useSWR(portofolioUrl, fetchData);
   const { data: profile, error: profileError, isLoading: profileLoading, mutate: profileMutate } = useSWR(profileUrl, fetchData);
+  const { data: medias, error: mediaError, isLoading: mediaLoading, mutate: mediaMutate} = useSWR(mediaUrl, fetchData);
+
   const [deletedPortofolio, setDeletePortofolio] = useState([]);
   const [addedPortofolio, setAddPortofolio] = useState([]);
   const [isUpdatedProfile, setUpdatingProfile] = useState(false);
+  const [isUpdateBackground, setUpdatingBackground] = useState(false);
+  const [isUpdateAvatar, setUpdatingAvatar] = useState(false);
 
   const handleEditProfile = (newData) => {
     const newProfile = {
@@ -135,11 +157,43 @@ export default function Page() {
       if (addedPortofolio.length > 0) {
         await addPortofolio(portofolioUrl, addedPortofolio);
       }
+      if(isUpdateAvatar) {
+        const avatar = medias.medias.filter((media) => !media.isBackground);
+        await updateMedia(mediaUrl, avatar[0])
+      }
+      if(isUpdateBackground) {
+        const background = medias.medias.filter((media) => media.isBackground);
+        await updateMedia(mediaUrl, background[0]);
+      }
       router.push('/') 
     } catch (error) {
       throw new Error(error.message);
     }
+  }
 
+  const handleChangeBackgroundImage = async (base64) => {
+    const background = medias.medias.filter(image => image.isBackground);
+    if(background.length > 0) {
+      const otherMedia = medias.medias.filter(image => !image.isBackground);
+      const data = {
+        medias:  [...otherMedia, {...background[0], base64}]
+      }
+      setUpdatingBackground(true);
+      mediaMutate(data, false)
+    }
+    
+  }
+
+  const handleChangeAvatarImage = (base64) => {
+    const avatar = medias.medias.filter(image => !image.isBackground);
+    if(avatar.length > 0) {
+      const otherMedia = medias.medias.filter(image => image.isBackground);
+      const data = {
+        medias:  [...otherMedia, {...avatar[0], base64}]
+      }
+      setUpdatingAvatar(true);
+      mediaMutate(data, false)
+    }
   }
   return (
     <Flex 
@@ -156,17 +210,11 @@ export default function Page() {
             bg='#EDF2F7'
             borderRadius='15px'
             height='max-content'>
+
+            {/* Form Card */}
             <Flex gap={3} direction='column' w='2xl'>
-              <Card shadow='xl'>
-                <FormControl>
-                  <Input type='file' />
-                </FormControl>
-              </Card>
-              <Card shadow='xl'>
-                <FormControl>
-                  <Input type='file' />
-                </FormControl>
-              </Card>
+              <FileUpload title='Background Image' onChange={handleChangeBackgroundImage}/>
+              <FileUpload title='Avatar Image' onChange={handleChangeAvatarImage}/>
               <ProfileForm onSubmit={handleEditProfile}/>
               <PortofolioForm onSubmitted={handleEditPortofolio}/>
             </Flex>
@@ -179,14 +227,8 @@ export default function Page() {
                 borderRadius='15px'
                 position='relative'
                 shadow='xl'>
-                <Box
-                  position="absolute"
-                  top="200px"
-                  left="50%"
-                  transform="translate(-50%, -50%)">
-                  <Avatar src='https://bit.ly/dan-abramov' size="xl" />
-                </Box>
-                <Image borderRadius='15px 15px 0 0' objectFit='cover' h='200px' src='https://bit.ly/dan-abramov' alt='Dan Abramov' marginBottom='1.5rem' />
+                <AvatarImage data={medias} isLoading={mediaLoading} error={mediaError}/>
+                <BackgroundImage data={medias} isLoading={mediaLoading} error={mediaError}/>
                 <CardHeader textAlign='center' alignSelf='center' width='80%' marginTop='0'>
                   <Profile data={profile} isLoading={profileLoading} error={profileError}/>
                 </CardHeader>
