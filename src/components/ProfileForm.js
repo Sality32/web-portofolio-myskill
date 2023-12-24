@@ -45,7 +45,7 @@ const ProfileForm = ({ onSubmit }) => {
                 <Textarea variant='outline' placeholder='Description' {...register('description')}  _placeholder={{textDecoration: 'underline'}} resize='none'/>
                 <FormErrorMessage>{errors.description}</FormErrorMessage>
               </FormControl>
-              <Button w='100%' type='submit'>Add</Button>
+              <Button w='100%' type='submit'>Edit Profile</Button>
             </VStack>
           </Flex>
         </CardBody>

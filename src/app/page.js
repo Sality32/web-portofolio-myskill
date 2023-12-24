@@ -1,4 +1,6 @@
 'use client'
+import AvatarImage from '@/components/AvatarImage';
+import BackgroundImage from '@/components/BackgroundImage';
 import ListPortofolio from '@/components/ListPortofolio';
 import Profile from '@/components/Profile';
 import { Avatar, Box, Button, Card, CardBody,CardHeader,Container, Flex, Image, Link, Text } from '@chakra-ui/react';
@@ -12,11 +14,12 @@ const fetchData = async(url) => {
 }
 const portofolioUrl = 'https://6586ceb3468ef171392ec700.mockapi.io/api/v1/portofolios';
 const profileUrl = 'https://6586ceb3468ef171392ec700.mockapi.io/api/v1/profile';
+const mediaUrl = '/api/media';
 
 export default function Page() {
-  const { data: portofolios, error: portofolioError, isLoading: portofolioLoading, mutate: portofolioMutate } = useSWR(portofolioUrl, fetchData);
-  const { data: profile, error: profileError, isLoading: profileLoading, mutate: profileMutate } = useSWR(profileUrl, fetchData);
-  
+  const { data: portofolios, error: portofolioError, isLoading: portofolioLoading } = useSWR(portofolioUrl, fetchData);
+  const { data: profile, error: profileError, isLoading: profileLoading } = useSWR(profileUrl, fetchData);
+  const { data: medias, error: mediaError, isLoading: mediaLoading} = useSWR(mediaUrl, fetchData);
   
   return (
         <Flex 
@@ -40,14 +43,8 @@ export default function Page() {
               maxW='4xl'
               borderRadius='15px'
               position='relative'>
-              <Box
-                position="absolute"
-                top="200px"
-                left="50%"
-                transform="translate(-50%, -50%)">
-                <Avatar src='https://bit.ly/dan-abramov' size="xl" />
-              </Box>
-              <Image borderRadius='15px 15px 0 0' objectFit='cover' h='200px' src='https://bit.ly/dan-abramov' alt='Dan Abramov' marginBottom='1.5rem' />
+              <AvatarImage data={medias} isLoading={mediaLoading} error={mediaError}/>
+              <BackgroundImage data={medias} isLoading={mediaLoading} error={mediaError} />
               <CardHeader textAlign='center' alignSelf='center' width='80%' marginTop='0'> 
                 <Profile data={profile} isLoading={profileLoading} error={profileError} />
               </CardHeader>  
