@@ -1,44 +1,145 @@
 'use client'
-import { useState } from 'react';
 import ProfileForm from '../../components/ProfileForm';
 import { Avatar, Box, Button, Card, CardBody, CardHeader, Container, Flex, FormControl,  Image, Input, Link, Text, Textarea } from '@chakra-ui/react';
 import PortofolioForm from '../../components/PortofolioForm';
-const showFormattedDate = (date) => {
-  const options = {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric"
-  }
-  return new Date(date).toLocaleDateString("id-ID", options)
+import Profile from '@/components/Profile';
+import useSWR from 'swr';
+import ListPortofolio from '@/components/ListPortofolio';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Error from 'next/error';
+const fetchData = async(url) => {
+  const response = await fetch(url);
+  const data = await response.json();
+  return data;
 }
 
+const storeOrUpdateProfile = async(url, bodyData, isExist) => {
+  try {
+    if (isExist) {
+      await fetch(url+`/${bodyData[0].id}`, {
+        method:'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(bodyData[0])
+      });
+     
+    }else {
+      await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(bodyData[0])
+      });
+    }
+  
+  } catch (error) {
+    throw new Error(error.message); 
+  }
+}
+
+const deletePortofolio = async(url, ids) => {
+  try {
+    await Promise.all(ids.map( async id => {
+      await fetch(url+`/${id}`, { method: 'DELETE' });
+      return id;
+    }))
+    
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+const addPortofolio = async(url, data) => {
+  try {
+    await Promise.all(data.map( async porto => {
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(porto),
+        });
+        const jsonRespon = await response.json();
+        return jsonRespon;
+      } catch (error) {
+        return error.message;
+      }
+    }));
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+const portofolioUrl = 'https://6586ceb3468ef171392ec700.mockapi.io/api/v1/portofolios';
+const profileUrl = 'https://6586ceb3468ef171392ec700.mockapi.io/api/v1/profile';
+
 export default function Page() {
-  const [profile, setProfile] = useState(
-    {
-      "createdAt": "2023-12-22T23:56:20.093Z",
-      "companyName": "MySkill",
-      "isProfile": true,
-      "name": "Yoga Subagja",
-      "position": "Frontend Developer",
-      "startDate": null,
-      "endDate": null,
-      "description": `I need to slicing design from figma to nextjs component and page,
-      then i need to integrated form data with api service. 
-      Fixing some bugs and update design based on the planning or requesting from designer teams.`,
-      "id": "1",
-      "Position": "Backend"
-    });
-  const [portofolio, setPortofolio] = useState([]);
-  const handleSubmitProfile = (data) => {
-    console.log(data);
-    setProfile({ ...profile, ...data})
+  
+  const router = useRouter();
+  const { data: portofolios, error: portofolioError, isLoading: portofolioLoading, mutate: portofolioMutate } = useSWR(portofolioUrl, fetchData);
+  const { data: profile, error: profileError, isLoading: profileLoading, mutate: profileMutate } = useSWR(profileUrl, fetchData);
+  const [deletedPortofolio, setDeletePortofolio] = useState([]);
+  const [addedPortofolio, setAddPortofolio] = useState([]);
+  const [isUpdatedProfile, setUpdatingProfile] = useState(false);
+
+  const handleEditProfile = (newData) => {
+    const newProfile = {
+      id: 1,
+      name: newData.name,
+      position: newData.position,
+      description: newData.description
+    }
+    const tempProfile = profile.length > 0 ? {...profile[0], ...newProfile}: newProfile;
+    
+    if (profile.length > 0) {
+      setUpdatingProfile(profile.length > 0);
+    }
+    profileMutate( [tempProfile], false )
   }
 
-  const handleSubmitPortofolio = (data) => {
-    console.log(data);
-    const portofolioId = portofolio.length+1;
-    setPortofolio((prevPortofolio) => [...prevPortofolio, {id: portofolioId, ...data}])
+  const handleEditPortofolio = (newData) => {
+    const lastId = portofolios.length > 0 ? portofolios.sort((a,b) => b.id-a.id)[0].id : 0;
+    const newPortofolio = {
+      companyName: newData.companyName,
+      startDate: newData.startDate,
+      endDate: newData.endDate,
+      description: newData.description,
+      id: parseInt(lastId, 10) +1
+    }
+    setAddPortofolio((prevState) => [...prevState, {...newPortofolio}])
+    portofolioMutate([...portofolios, {...newPortofolio}], false)
+  }
+
+  const handleDeletePortofolio = (portofolioId) => {
+    const isLocalData = addedPortofolio.filter((item) => item.id === portofolioId);
+    const removedData = portofolios.filter((item) => item.id !== portofolioId);
+    if (isLocalData.length === 0 ) {
+      setDeletePortofolio((prevState) => [...prevState, portofolioId]);
+    }else {
+      const newAddedPortofolio = addedPortofolio.filter((item) => item.id !== portofolioId);
+      setAddPortofolio(newAddedPortofolio);
+    }
+    portofolioMutate([...removedData], false)
+  }
+
+  const handleSubmitted = async () => {
+    try {
+      if (profile.length>0) {
+        await storeOrUpdateProfile(profileUrl, profile, isUpdatedProfile)
+      }
+      if (deletedPortofolio.length > 0 ){
+        await deletePortofolio(portofolioUrl, deletedPortofolio);
+      }
+      if (addedPortofolio.length > 0) {
+        await addPortofolio(portofolioUrl, addedPortofolio);
+      }
+      router.push('/') 
+    } catch (error) {
+      throw new Error(error.message);
+    }
+
   }
   return (
     <Flex 
@@ -50,13 +151,6 @@ export default function Page() {
         minW='max-content' 
         bg='#EDF2F7'
         padding='0.5rem'> 
-        <Box marginBottom='20px'>
-          <Link href='/'>
-            <Button colorScheme="green" >
-              Kembali
-            </Button>
-          </Link>
-        </Box>
         <Flex gap={5} justifyContent='center'>
           <Box 
             bg='#EDF2F7'
@@ -73,8 +167,8 @@ export default function Page() {
                   <Input type='file' />
                 </FormControl>
               </Card>
-              <ProfileForm onSubmit={handleSubmitProfile}/>
-              <PortofolioForm onSubmitted={handleSubmitPortofolio}/>
+              <ProfileForm onSubmit={handleEditProfile}/>
+              <PortofolioForm onSubmitted={handleEditPortofolio}/>
             </Flex>
           </Box>
           <Box 
@@ -94,47 +188,22 @@ export default function Page() {
                 </Box>
                 <Image borderRadius='15px 15px 0 0' objectFit='cover' h='200px' src='https://bit.ly/dan-abramov' alt='Dan Abramov' marginBottom='1.5rem' />
                 <CardHeader textAlign='center' alignSelf='center' width='80%' marginTop='0'>
-                  <Text fontSize='2xl' fontWeight='bold'>{profile.name}</Text>
-                  <Text fontSize='md' color='grey' fontWeight='700'>{profile.position}</Text>
-                  <Text fontSize='sm' fontWeight='300'>{profile.description}</Text>
+                  <Profile data={profile} isLoading={profileLoading} error={profileError}/>
                 </CardHeader>
                 <CardBody marginStart='20px'>
-                  <Box display='flex' justifyContent='flex-end' marginEnd='10px'>
-                    <Link href='https://google.com' isExternal>
-                      <Button colorScheme="green" variant='outline'>
-                        Save
+                  <Flex gap={4} justifyContent='flex-end' marginEnd='10px'>
+                    <Link href='/'>
+                      <Button colorScheme="green" >
+                        Kembali
                       </Button>
                     </Link>
-                    
-                  </Box>
+                    <Button colorScheme="green" variant='outline' onClick={handleSubmitted}>
+                      Save
+                    </Button>
+                  </Flex>
                   <Text fontSize='xl' fontWeight='bold'>Portofolio</Text>
                   <Flex gap={3} direction='column'>
-                    { portofolio.length === 0 ? 'Not Have Data' : 
-                      portofolio.map((porto) => (
-                        <Card borderRadius='1-px' shadow='xl' marginTop='5px' key={porto.id}>
-                          <CardHeader>
-                          <Text fontSize='lg' fontWeight='600'>{porto.position}</Text>
-                          <Text fontSize='md' fontWeight='600' color='grey'>{porto.companyName}</Text>
-                          <Text fontSize='sm' fontWeight='200'>{showFormattedDate(porto.startDate)} - {showFormattedDate(porto.endDate)}</Text>
-                          </CardHeader>
-                          <CardBody>
-                            {porto.description}
-                          </CardBody>
-                        </Card>  
-                      ))
-                    }
-                    
-                    
-                    {/* <Card borderRadius='10px' shadow='xl' marginTop='5px'>
-                      <CardHeader>
-                      <Text fontSize='lg' fontWeight='600'>Front End Developer</Text>
-                      <Text fontSize='md' fontWeight='600' color='grey'>MySkill</Text>
-                      <Text fontSize='sm' fontWeight='200'>Januari 2023 - Desember 2023</Text>
-                      </CardHeader>
-                      <CardBody>
-                        Deskripsi, lorem ipsum dolor sit amet lorem ipsum dolor sit amet lorem ipsum dolor sit amet lorem ipsum dolor sit amet 
-                      </CardBody>
-                    </Card>    */}
+                    <ListPortofolio data={portofolios} isLoading={portofolioLoading} error={portofolioError} onDelete={handleDeletePortofolio} />
                   </Flex>
                 </CardBody>
               </Card>
