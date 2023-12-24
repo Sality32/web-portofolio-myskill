@@ -21,7 +21,6 @@ const ProfileForm = ({ onSubmit }) => {
         await schema.validate(data, {abortEarly: false});
         return { values: data, errors: {}}
       } catch (error) {
-        console.log(error.message);
         return { values: {}, errors: error.inner.reduce((acc, e) => ({ ...acc, [e.path]: e.message}), {})};
       }
     },
