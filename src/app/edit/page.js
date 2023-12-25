@@ -105,6 +105,7 @@ export default function Page() {
   const [isUpdatedProfile, setUpdatingProfile] = useState(false);
   const [isUpdateBackground, setUpdatingBackground] = useState(false);
   const [isUpdateAvatar, setUpdatingAvatar] = useState(false);
+  const [isEditedPage, _] = useState(true);
 
   const handleEditProfile = (newData) => {
     const newProfile = {
@@ -200,19 +201,21 @@ export default function Page() {
       minWidth='max-content' 
       bg='#EDF2F7' 
       alignItems='center'
-      direction='column'>
+      justifyContent='center'
+      direction={{xl: 'row', lg:"column", md:'column', sm:'column', base: "column", }}>
       <Container 
         minW='max-content' 
         bg='#EDF2F7'
         padding='0.5rem'> 
-        <Flex gap={5} justifyContent='center'>
+        <Flex gap={5}  alignItems={{"2xl": 'flex-start', xl: 'flex-start', lg: 'flex-start', md:'center', sm:'center', base: "center"}}  direction={{ "2xl": "row", xl: "row", lg: 'column', md:'column', sm:'column', base: "column" }}>
           <Box 
             bg='#EDF2F7'
             borderRadius='15px'
-            height='max-content'>
+            height='max-content'
+            width={{ "2xl": "2xl", xl: "xl", lg:'xl', md:'xl', sm:"md",  base:'sm'}}>
 
             {/* Form Card */}
-            <Flex gap={3} direction='column' w='2xl'>
+            <Flex gap={3} direction='column' width={{ "2xl": "2xl", xl: "xl", lg:'xl', md:'xl',sm: "md",  base:'sm'}}>
               <FileUpload title='Background Image' onChange={handleChangeBackgroundImage}/>
               <FileUpload title='Avatar Image' onChange={handleChangeAvatarImage}/>
               <ProfileForm onSubmit={handleEditProfile}/>
@@ -221,9 +224,11 @@ export default function Page() {
           </Box>
           <Box 
               bg='#EDF2F7'
-              borderRadius='15px'>
+              borderRadius='15px'
+              width={{"2xl":'2xl', xl: '2xl',lg: "xl", md:'xl', sm:"md", base:'sm'}}
+                >
               <Card  
-                w='2xl'
+                maxWidth={{"2xl":'2xl', xl: '2xl',lg: "xl", md:'xl', sm:"md", base:'sm'}}
                 borderRadius='15px'
                 position='relative'
                 shadow='xl'>
@@ -243,10 +248,8 @@ export default function Page() {
                       Save
                     </Button>
                   </Flex>
-                  <Text fontSize='xl' fontWeight='bold'>Portofolio</Text>
-                  <Flex gap={3} direction='column'>
-                    <ListPortofolio data={portofolios} isLoading={portofolioLoading} error={portofolioError} onDelete={handleDeletePortofolio} />
-                  </Flex>
+                    <ListPortofolio data={portofolios} isLoading={portofolioLoading} error={portofolioError} onDelete={handleDeletePortofolio} isEditedPage={isEditedPage}/>
+                  
                 </CardBody>
               </Card>
           </Box>
