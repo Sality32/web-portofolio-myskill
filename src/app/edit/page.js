@@ -241,7 +241,7 @@ export default function Page() {
                   <Flex gap={4} justifyContent='flex-end' marginEnd='10px'>
                     <Link href='/'>
                       <Button colorScheme="green" >
-                        Kembali
+                        Back
                       </Button>
                     </Link>
                     <Button colorScheme="green" variant='outline' onClick={handleSubmitted}>
