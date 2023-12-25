@@ -1,36 +1,84 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Portofolio Web
+This is the repository to finish technical test from MySkill
 
 ## Getting Started
 
-First, run the development server:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### Installation
+
+_Below is an example of how you can instruct your audience on installing and setting up your app. This template doesn't rely on any external dependencies or services._
+
+1. Clone the repo
+   ```cmd
+   git clone https://github.com/Sality32/web-portofolio-myskill.git
+   ```
+2. Go to project
+   ```cmd
+   cd web-portofolio-myskill
+   ```
+3. install npm 
+   ```sh
+   npm insall 
+   ```
+4. run project
+   ```sh
+   npm run dev
+   ```
+
+## Schema Data
+I use 2 types store data in local, i use mockAPI to store my portofolio and profile data and i use file json with fs for my image **with base 64 format**
+
+when i trying to use mockApi, i get denied about maximum load data when i store, base64 had to long string and i was tryng using object its same, so i decide to use json file.
+## MockAPI
+### JSON Data
+```
+profile: {
+    id: int,
+    name: string,
+    description: string,
+    position: string,
+    createdAt: date
+},
+portofolio: {
+    id: int,
+    companyName: string,
+    description: string,
+    position: string,
+    startDate: date,
+    endDate: date,
+    createdAt: date
+}
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## JSON FILE with fs
+```
+medias: [
+    {
+        id: int,
+        name: string,
+        isBackground: boolean,
+        base64: text
+    }
+]
+```
+## Update Design
+from the desain, i had some update on page
+### Show Page
+- Add button edit under profile to make user focus on card portofolio
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+### Edit Page
+- add button every form card that make user can edit separated part of page
+- When upload file on background, that show preview before implement in page
+- When upload file on avatar, that show preview in avatar image when implement
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+- Add Save and Back Button to make user easier decided about changes
+- Add remove icon on every item Portofolio, make user can remove exist portofolio or new portofolio before save
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+## Tech Stack
+- NodeJS 18.19.0
+- react-dom 18.*
+- Chakra ui 2.8.2
+- react 18.
+- Next JS 13.*
+- Yup 1.3.3
+- SWR 2.2.4
