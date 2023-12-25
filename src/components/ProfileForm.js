@@ -10,7 +10,6 @@ const ProfileForm = ({ onSubmit }) => {
     register,
     formState: {errors},
   } = useForm({
-    mode: 'onBlur',
     resolver: async (data) => {
       try {
         const schema = Yup.object({
@@ -25,14 +24,18 @@ const ProfileForm = ({ onSubmit }) => {
       }
     },
   });
+
+  const handleFormSubmit = ( data) => {
+    onSubmit(data);
+  }
   return (
-    <Card shadow='xl'>
+    <Card shadow='xl' maxWidth={{  "2xl": '2xl', xl: "xl", lg:'xl', md:'xl', sm:"md",  base:'sm'}}>
         <CardHeader>
           <Text fontSize='md' fontWeight='bold' textDecoration='underline'>Profile</Text>
         </CardHeader>
         <CardBody>
           <Flex gap={6} direction='column'>
-            <VStack as='form'  onSubmit={handleSubmit(onSubmit)}>
+            <VStack as='form'  onSubmit={handleSubmit(handleFormSubmit)}>
               <FormControl isInvalid={!!errors.name} >  
                 <Input variant='outline' placeholder='Name' {...register('name')} _placeholder={{textDecoration: 'underline'}}/>
                 <FormErrorMessage>{errors.name}</FormErrorMessage>

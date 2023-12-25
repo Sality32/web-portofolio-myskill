@@ -27,20 +27,19 @@ export default function Page() {
         bg='white' 
         alignItems='center'>
         <Container 
-          minW='100%' 
+          maxW={{"2xl":'4xl', xl: '4xl', lg:'2xl', md:'xl', sm:'md', base: 'sm'}} 
           backgroundColor='#EDF2F7'
-          height='100%'
           padding='2rem'
           display='flex'
           justifyContent="center"
           alignItems="center"> 
-        <Box 
-            width='4xl'
+          <Box 
+            width={{ "2xl":'4xl', xl: '4xl', lg:'2xl', md:'xl', sm:'md', base: 'sm'}}
             bg='#EDF2F7'
             boxShadow='base'
             borderRadius='15px'>
             <Card  
-              maxW='4xl'
+              maxW={{  "2xl":'4xl', xl: '4xl', lg:'2xl', md:'xl', sm:'md', base: 'sm'}}
               borderRadius='15px'
               position='relative'>
               <AvatarImage data={medias} isLoading={mediaLoading} error={mediaError}/>
@@ -57,10 +56,7 @@ export default function Page() {
                   </Link>
                   
                 </Box>
-                <Text fontSize='xl' fontWeight='bold'>Portofolio</Text>
-                <Flex gap={3} direction='column'>
                   <ListPortofolio data={portofolios} isLoading={portofolioLoading} error={portofolioError}/>
-                </Flex>
               </CardBody>
             </Card>
         </Box>

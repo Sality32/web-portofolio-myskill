@@ -32,7 +32,7 @@ const FileUpload = ({ title, onChange}) => {
   };
 
   return (
-    <Card shadow='xl'>
+    <Card shadow='xl' maxWidth={{ "2xl": '2xl',xl: 'xl', lg:'xl', md:'xl',sm:"md",  base:'sm'}}>
       <CardHeader>
           <Text fontSize='md' fontWeight='bold' textDecoration='underline'>{title}</Text>
         </CardHeader>

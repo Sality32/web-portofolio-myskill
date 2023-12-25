@@ -1,9 +1,17 @@
-import { Image, Spinner, Text } from '@chakra-ui/react';
+import { Box, Image, Spinner, Text } from '@chakra-ui/react';
 
 const BackgroundImage = ({ data, isLoading, error}) => {
   
   if(isLoading) {
-    return <Spinner size='xl' color='teal.500' key='spinnerListPortofolio'></Spinner>
+    return(
+      <Box
+      position="absolute"
+      top={{base: '10', sm:'10px'}}
+      left="50%"
+      transform="translate(-50%, -50%)">
+        <Spinner size={{lg: 'xl', sm:'sm'}} color='teal.500' key='spinnerListPortofolio'></Spinner>
+      </Box>
+    ) 
   }
 
   if(error) {
